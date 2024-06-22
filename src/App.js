@@ -14,7 +14,7 @@ const App = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/initiate_payment', {
+      const response = await axios.post('https://payment-gateway-cashfree-backend.onrender.com/initiate_payment', {
         order_id: orderId,
         order_amount: amount,
         customer_id: customerId,
