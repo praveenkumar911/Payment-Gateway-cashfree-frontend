@@ -1,89 +1,49 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useEffect } from 'react';
 
-const PaymentForm = () => {
-  const [orderAmount, setOrderAmount] = useState('');
-  const [orderId, setOrderId] = useState('');
-  const [customerId, setCustomerId] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('upi'); // Default payment method
-  const [paymentSessionId, setPaymentSessionId] = useState(''); // State for payment session ID
-  const [orderResponse, setOrderResponse] = useState(null);
+const PaymentPage = () => {
+  useEffect(() => {
+    // Get the session ID from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentSessionId = urlParams.get('payment_session_id');
 
-  const createOrder = async () => {
-    try {
-      const response = await axios.post('http://localhost:5000/create_order', {
-        order_amount: orderAmount,
-        order_id: orderId,
-        customer_id: customerId,
-        customer_phone: customerPhone,
-        payment_method: paymentMethod // Include selected payment method
-      });
-      setOrderResponse(response.data);
-      setPaymentSessionId(response.data.payment_session_id); // Set the payment session ID
-    } catch (error) {
-      console.error('Error creating order:', error.response ? error.response.data : error.message);
+    if (paymentSessionId) {
+      // Initialize the payment options using Cashfree
+      const script = document.createElement('script');
+      script.src = 'https://sdk.cashfree.com/js/v1/cashfree.min.js';
+      script.onload = () => {
+        // Configure and display the payment options
+        window.Cashfree.init({
+          layout: {
+            mode: 'fullscreen', // 'page' or 'fullscreen'
+            container: 'payment-container', // The ID of the container where the payment options will be rendered
+            theme: {
+              backgroundColor: '#ffffff',
+              color: '#000000'
+            }
+          },
+          paymentSessionId: paymentSessionId,
+          onSuccess: (data) => {
+            console.log('Payment Successful:', data);
+            // Redirect or show success message
+          },
+          onFailure: (data) => {
+            console.log('Payment Failed:', data);
+            // Show error message
+          }
+        });
+      };
+      document.body.appendChild(script);
+    } else {
+      console.error('Payment session ID is missing in the URL');
     }
-  };
-
-  const handlePayment = async () => {
-    try {
-      const response = await axios.post('http://localhost:5000/pay_order', {
-        payment_session_id: paymentSessionId, // Use the correct payment session ID
-        payment_method: paymentMethod // Include selected payment method
-      });
-      console.log('Payment initiated successfully:', response.data);
-      // Handle payment response as needed (e.g., redirect user to payment gateway)
-    } catch (error) {
-      console.error('Error initiating payment:', error.response ? error.response.data : error.message);
-    }
-  };
+  }, []);
 
   return (
     <div>
-      <h2>Create Order & Payment</h2>
-      <form onSubmit={(e) => { e.preventDefault(); createOrder(); }}>
-        <label>
-          Order Amount:
-          <input type="number" value={orderAmount} onChange={(e) => setOrderAmount(e.target.value)} />
-        </label>
-        <br />
-        <label>
-          Order ID:
-          <input type="text" value={orderId} onChange={(e) => setOrderId(e.target.value)} />
-        </label>
-        <br />
-        <label>
-          Customer ID:
-          <input type="text" value={customerId} onChange={(e) => setCustomerId(e.target.value)} />
-        </label>
-        <br />
-        <label>
-          Customer Phone:
-          <input type="text" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
-        </label>
-        <br />
-        <label>
-          Payment Method:
-          <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-            <option value="upi">UPI</option>
-            <option value="card">Card</option>
-            {/* Add more options for other payment methods */}
-          </select>
-        </label>
-        <br />
-        <button type="submit">Create Order</button>
-      </form>
-
-      {orderResponse && (
-        <div>
-          <h3>Order Response</h3>
-          <pre>{JSON.stringify(orderResponse, null, 2)}</pre>
-          <button onClick={handlePayment}>Initiate Payment</button>
-        </div>
-      )}
+      <h1>Payment Page</h1>
+      <div id="payment-container"></div> {/* This div will contain the payment options */}
     </div>
   );
 };
 
-export default PaymentForm;
+export default PaymentPage;
