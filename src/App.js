@@ -29,7 +29,7 @@ const App = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('https://payment-gateway-cashfree-backend.vercel.app/initiate_payment', {
+      const response = await axios.post('https://payment-gateway-cashfree-backend.onrender.com/initiate_payment', {
         order_id: orderId,
         order_amount: amount,
         customer_id: customerId,
