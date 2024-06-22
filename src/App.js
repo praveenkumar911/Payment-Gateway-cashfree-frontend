@@ -1,5 +1,7 @@
 import React from 'react';
 import axios from 'axios';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import './App.css';
 
 class App extends React.Component {
   state = {
@@ -8,7 +10,16 @@ class App extends React.Component {
     customerId: '',
     customerPhone: '',
     customerEmail: '',
-    paymentUrl: ''
+    paymentSessionId: '',
+    openDialog: false // State to control dialog visibility
+  };
+
+  handleOpenDialog = () => {
+    this.setState({ openDialog: true });
+  };
+
+  handleCloseDialog = () => {
+    this.setState({ openDialog: false });
   };
 
   handleSubmit = async (e) => {
@@ -26,8 +37,8 @@ class App extends React.Component {
       });
 
       const { payment_session_id } = response.data;
-      const paymentUrl = `https://payment-gateway-cashfree-frontend.vercel.app/payment_page?payment_session_id=${payment_session_id}`;
-      window.location.href = paymentUrl; // Redirect to Cashfree payment page
+      this.setState({ paymentSessionId: payment_session_id });
+      this.handleOpenDialog(); // Open dialog after receiving payment session ID
     } catch (error) {
       console.error('Error:', error);
       // Handle error as needed
@@ -48,59 +59,65 @@ class App extends React.Component {
           <div>
             <h2>Payment Form</h2>
             <form onSubmit={this.handleSubmit}>
-              <label>
-                Order Amount:
-                <input
-                  type="text"
-                  name="orderAmount"
-                  value={this.state.orderAmount}
-                  onChange={this.handleChange}
-                />
-              </label>
-              <br />
-              <label>
-                Order ID:
-                <input
-                  type="text"
-                  name="orderId"
-                  value={this.state.orderId}
-                  onChange={this.handleChange}
-                />
-              </label>
-              <br />
-              <label>
-                Customer ID:
-                <input
-                  type="text"
-                  name="customerId"
-                  value={this.state.customerId}
-                  onChange={this.handleChange}
-                />
-              </label>
-              <br />
-              <label>
-                Customer Phone:
-                <input
-                  type="text"
-                  name="customerPhone"
-                  value={this.state.customerPhone}
-                  onChange={this.handleChange}
-                />
-              </label>
-              <br />
-              <label>
-                Customer Email:
-                <input
-                  type="text"
-                  name="customerEmail"
-                  value={this.state.customerEmail}
-                  onChange={this.handleChange}
-                />
-              </label>
-              <br />
-              <button type="submit">Pay with Cashfree</button>
+              <TextField
+                label="Order Amount"
+                type="text"
+                name="orderAmount"
+                value={this.state.orderAmount}
+                onChange={this.handleChange}
+                fullWidth
+              />
+              <TextField
+                label="Order ID"
+                type="text"
+                name="orderId"
+                value={this.state.orderId}
+                onChange={this.handleChange}
+                fullWidth
+              />
+              <TextField
+                label="Customer ID"
+                type="text"
+                name="customerId"
+                value={this.state.customerId}
+                onChange={this.handleChange}
+                fullWidth
+              />
+              <TextField
+                label="Customer Phone"
+                type="text"
+                name="customerPhone"
+                value={this.state.customerPhone}
+                onChange={this.handleChange}
+                fullWidth
+              />
+              <TextField
+                label="Customer Email"
+                type="text"
+                name="customerEmail"
+                value={this.state.customerEmail}
+                onChange={this.handleChange}
+                fullWidth
+              />
+              <Button type="submit" variant="contained" color="primary">Pay with Cashfree</Button>
             </form>
           </div>
+
+          <Dialog open={this.state.openDialog} onClose={this.handleCloseDialog} fullWidth maxWidth="sm">
+            <DialogTitle>Payment Gateway</DialogTitle>
+            <DialogContent>
+              <iframe
+                title="Cashfree Payment Gateway"
+                src={`https://payment-gateway-cashfree-frontend.vercel.app/payment_page?payment_session_id=${this.state.paymentSessionId}`}
+                width="100%"
+                height="600px"
+                frameBorder="0"
+              ></iframe>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.handleCloseDialog} color="primary">Close</Button>
+            </DialogActions>
+          </Dialog>
         </main>
       </div>
     );
