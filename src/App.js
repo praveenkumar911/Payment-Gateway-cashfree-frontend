@@ -1,18 +1,3 @@
-// import logo from './logo.svg';
-// import './App.css';
-// import PaymentForm from './Paymentform';
-
-// function App() {
-//   return (
-//     <div className="App">
-//      <PaymentForm/>
-//     </div>
-//   );
-// }
-
-// export default App;
-
-
 // src/App.js
 import React, { useState } from 'react';
 import axios from 'axios';
@@ -29,7 +14,7 @@ const App = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('https://payment-gateway-cashfree-backend.onrender.com/initiate_payment', {
+      const response = await axios.post('http://localhost:5000/initiate_payment', {
         order_id: orderId,
         order_amount: amount,
         customer_id: customerId,
