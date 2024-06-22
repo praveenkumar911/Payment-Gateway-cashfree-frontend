@@ -25,8 +25,9 @@ class App extends React.Component {
         customer_email: this.state.customerEmail
       });
 
-      const { payment_url } = response.data;
-      this.setState({ paymentUrl: payment_url });
+      const { payment_session_id } = response.data;
+      const paymentUrl = `https://payment-gateway-cashfree-frontend.vercel.app/payment_page?payment_session_id=${payment_session_id}`;
+      window.location.href = paymentUrl; // Redirect to Cashfree payment page
     } catch (error) {
       console.error('Error:', error);
       // Handle error as needed
@@ -100,19 +101,6 @@ class App extends React.Component {
               <button type="submit">Pay with Cashfree</button>
             </form>
           </div>
-
-          {this.state.paymentUrl && (
-            <div>
-              <p>Redirecting to Cashfree payment page...</p>
-              <iframe
-                title="Cashfree Payment Gateway"
-                src={this.state.paymentUrl}
-                width="100%"
-                height="600px"
-                frameBorder="0"
-              ></iframe>
-            </div>
-          )}
         </main>
       </div>
     );
