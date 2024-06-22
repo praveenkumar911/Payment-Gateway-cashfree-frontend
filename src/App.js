@@ -1,61 +1,122 @@
-// src/App.js
-import React, { useState } from 'react';
+import React from 'react';
 import axios from 'axios';
-import './App.css';
 
-const App = () => {
-  const [orderId, setOrderId] = useState('');
-  const [amount, setAmount] = useState('');
-  const [customerId, setCustomerId] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [paymentUrl, setPaymentUrl] = useState('');
+class App extends React.Component {
+  state = {
+    orderAmount: '',
+    orderId: '',
+    customerId: '',
+    customerPhone: '',
+    customerEmail: '',
+    paymentUrl: ''
+  };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  handleSubmit = async (e) => {
+    e.preventDefault();
+
     try {
-      const response = await axios.post('https://payment-gateway-cashfree-backend.onrender.com/initiate_payment', {
-        order_id: orderId,
-        order_amount: amount,
-        customer_id: customerId,
-        customer_phone: customerPhone,
-        customer_email: customerEmail
+      const serverUrl = 'https://payment-gateway-cashfree-backend.onrender.com/initiate_payment';
+
+      const response = await axios.post(serverUrl, {
+        order_amount: this.state.orderAmount,
+        order_id: this.state.orderId,
+        customer_id: this.state.customerId,
+        customer_phone: this.state.customerPhone,
+        customer_email: this.state.customerEmail
       });
-      setPaymentUrl(response.data.payment_url);
+
+      const { payment_url } = response.data;
+      this.setState({ paymentUrl: payment_url });
     } catch (error) {
-      console.error('Error initiating payment:', error.response ? error.response.data.details : error.message);
+      console.error('Error:', error);
+      // Handle error as needed
     }
   };
 
-  return (
-    <div className="App">
-      <h1>Initiate Payment</h1>
-      <form onSubmit={handleSubmit}>
-        <label>Order ID: </label>
-        <input type="text" value={orderId} onChange={(e) => setOrderId(e.target.value)} required /><br />
-        
-        <label>Amount: </label>
-        <input type="text" value={amount} onChange={(e) => setAmount(e.target.value)} required /><br />
-        
-        <label>Customer ID: </label>
-        <input type="text" value={customerId} onChange={(e) => setCustomerId(e.target.value)} required /><br />
-        
-        <label>Customer Phone: </label>
-        <input type="text" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} required /><br />
-        
-        <label>Customer Email: </label>
-        <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} required /><br />
-        
-        <button type="submit">Pay Now</button>
-      </form>
-      {paymentUrl && (
-        <div>
-          <h2>Proceed to Payment</h2>
-          <a href={paymentUrl} target="_blank" rel="noopener noreferrer">Click here to pay</a>
-        </div>
-      )}
-    </div>
-  );
-};
+  handleChange = (e) => {
+    this.setState({ [e.target.name]: e.target.value });
+  };
+
+  render() {
+    return (
+      <div className="App">
+        <header className="App-header">
+          <h1>Cashfree Payment Gateway Integration</h1>
+        </header>
+        <main className="App-main">
+          <div>
+            <h2>Payment Form</h2>
+            <form onSubmit={this.handleSubmit}>
+              <label>
+                Order Amount:
+                <input
+                  type="text"
+                  name="orderAmount"
+                  value={this.state.orderAmount}
+                  onChange={this.handleChange}
+                />
+              </label>
+              <br />
+              <label>
+                Order ID:
+                <input
+                  type="text"
+                  name="orderId"
+                  value={this.state.orderId}
+                  onChange={this.handleChange}
+                />
+              </label>
+              <br />
+              <label>
+                Customer ID:
+                <input
+                  type="text"
+                  name="customerId"
+                  value={this.state.customerId}
+                  onChange={this.handleChange}
+                />
+              </label>
+              <br />
+              <label>
+                Customer Phone:
+                <input
+                  type="text"
+                  name="customerPhone"
+                  value={this.state.customerPhone}
+                  onChange={this.handleChange}
+                />
+              </label>
+              <br />
+              <label>
+                Customer Email:
+                <input
+                  type="text"
+                  name="customerEmail"
+                  value={this.state.customerEmail}
+                  onChange={this.handleChange}
+                />
+              </label>
+              <br />
+              <button type="submit">Pay with Cashfree</button>
+            </form>
+          </div>
+
+          {this.state.paymentUrl && (
+            <div>
+              <p>Redirecting to Cashfree payment page...</p>
+              <iframe
+                title="Cashfree Payment Gateway"
+                src={this.state.paymentUrl}
+                width="100%"
+                height="600px"
+                frameBorder="0"
+              ></iframe>
+            </div>
+          )}
+        </main>
+      </div>
+    );
+  }
+}
 
 export default App;
